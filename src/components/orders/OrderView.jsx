@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, List, Search, FileText, Check } from 'lucide-react';
+import { Grid, List, Search, FileText, Check, ShoppingCart, X } from 'lucide-react';
 import ProductGrid from './ProductGrid';
 import Cart from './Cart';
 import ExcelUploader from './ExcelUploader';
 import { ingredientsService } from '../../services/ingredientsService';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const OrderView = ({ onOrderSubmit, savedLists = [] }) => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const [cartItems, setCartItems] = useState([]);
-    const [viewMode, setViewMode] = useState('list'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState(isMobile ? 'list' : 'list'); // 'grid' or 'list'
     const [productFilter, setProductFilter] = useState('');
     const [selectedListId, setSelectedListId] = useState('');
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showCart, setShowCart] = useState(false); // Para mobile: mostrar/ocultar carrito
 
     // Cargar productos/ingredientes desde Supabase
     useEffect(() => {
@@ -164,6 +167,9 @@ const OrderView = ({ onOrderSubmit, savedLists = [] }) => {
 
             alert('¡Pedido enviado con éxito!');
             setCartItems([]);
+            if (isMobile) {
+                setShowCart(false);
+            }
         } catch (error) {
             console.error('Error al enviar pedido:', error);
             alert(`Error al enviar pedido: ${error.message}`);
@@ -191,40 +197,86 @@ const OrderView = ({ onOrderSubmit, savedLists = [] }) => {
     }
 
     return (
-        <div style={{ display: 'flex', gap: '2rem', height: 'calc(100vh - 4rem)' }}>
-            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '1rem' }}>
-                <h1 style={{ marginBottom: '2rem', color: 'var(--primary)' }}>Realizar Pedido</h1>
+        <div style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1rem' : '1.5rem', 
+            height: isMobile ? 'auto' : 'calc(100vh - 4rem)',
+            minHeight: isMobile ? 'calc(100vh - 2rem)' : 'auto'
+        }}>
+            <div style={{ 
+                flex: 1, 
+                overflowY: isMobile ? 'visible' : 'auto', 
+                paddingRight: isMobile ? '0' : '1rem',
+                paddingBottom: isMobile ? '1rem' : '0'
+            }}>
+                <h1 style={{ 
+                    marginBottom: isMobile ? '1rem' : '1rem', 
+                    color: 'var(--primary)',
+                    fontSize: isMobile ? '1.5rem' : '1.5rem'
+                }}>
+                    Realizar Pedido
+                </h1>
 
                 {/* Sección de Listas Predefinidas */}
                 {savedLists.length > 0 && (
-                    <div className="card" style={{ marginBottom: '2rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                            <FileText size={20} style={{ color: 'var(--primary)' }} />
-                            <h2 style={{ margin: 0, color: 'var(--primary)' }}>Aplicar Lista Predefinida</h2>
+                    <div style={{ 
+                        marginBottom: isMobile ? '1rem' : '1rem',
+                        padding: isMobile ? '0.75rem' : '1rem',
+                        backgroundColor: 'var(--surface)',
+                        borderRadius: 'var(--radius)',
+                        border: '1px solid var(--border)'
+                    }}>
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.5rem', 
+                            marginBottom: isMobile ? '0.75rem' : '0.75rem'
+                        }}>
+                            <FileText size={isMobile ? 16 : 18} style={{ color: 'var(--primary)' }} />
+                            <h2 style={{ 
+                                margin: 0, 
+                                color: 'var(--primary)',
+                                fontSize: isMobile ? '1rem' : '1rem'
+                            }}>
+                                {isMobile ? 'Aplicar Lista' : 'Aplicar Lista Predefinida'}
+                            </h2>
                         </div>
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: isMobile ? 'column' : 'row',
+                            gap: isMobile ? '0.75rem' : '1rem', 
+                            alignItems: isMobile ? 'stretch' : 'flex-end'
+                        }}>
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                                    Selecciona una lista
-                                </label>
+                                {!isMobile && (
+                                    <label style={{ 
+                                        display: 'block', 
+                                        marginBottom: '0.5rem', 
+                                        fontSize: '0.9rem', 
+                                        color: 'var(--text-secondary)' 
+                                    }}>
+                                        Selecciona una lista
+                                    </label>
+                                )}
                                 <select
                                     value={selectedListId}
                                     onChange={(e) => setSelectedListId(e.target.value)}
                                     style={{
                                         width: '100%',
-                                        padding: '0.75rem',
+                                        padding: isMobile ? '0.6rem 0.75rem' : '0.75rem',
                                         borderRadius: 'var(--radius)',
                                         border: '1px solid var(--border)',
-                                        fontSize: '1rem',
+                                        fontSize: isMobile ? '0.9rem' : '1rem',
                                         backgroundColor: 'var(--background)',
                                         color: 'var(--text-primary)',
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    <option value="">-- Selecciona una lista --</option>
+                                    <option value="">{isMobile ? 'Selecciona lista...' : '-- Selecciona una lista --'}</option>
                                     {savedLists.map((list) => (
                                         <option key={list.id} value={list.id}>
-                                            {list.name} ({list.items.length} producto{list.items.length !== 1 ? 's' : ''})
+                                            {list.name} ({list.items.length})
                                         </option>
                                     ))}
                                 </select>
@@ -236,66 +288,96 @@ const OrderView = ({ onOrderSubmit, savedLists = [] }) => {
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
+                                    justifyContent: 'center',
                                     gap: '0.5rem',
-                                    padding: '0.75rem 1.5rem',
+                                    padding: isMobile ? '0.6rem 1rem' : '0.75rem 1.5rem',
                                     opacity: !selectedListId ? 0.5 : 1,
-                                    cursor: !selectedListId ? 'not-allowed' : 'pointer'
+                                    cursor: !selectedListId ? 'not-allowed' : 'pointer',
+                                    width: isMobile ? '100%' : 'auto',
+                                    fontSize: isMobile ? '0.9rem' : '1rem'
                                 }}
                             >
-                                <Check size={18} />
-                                Aplicar Lista
+                                <Check size={isMobile ? 16 : 18} />
+                                {isMobile ? 'Aplicar' : 'Aplicar Lista'}
                             </button>
                         </div>
                     </div>
                 )}
 
-                <ExcelUploader onUpload={handleExcelUpload} ingredients={products} />
+                {/* Ocultar ExcelUploader en mobile */}
+                {!isMobile && (
+                    <ExcelUploader onUpload={handleExcelUpload} ingredients={products} />
+                )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h2 style={{ margin: 0 }}>Productos Disponibles</h2>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: isMobile ? '1rem' : '0.75rem',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                }}>
+                    <h2 style={{ margin: 0, fontSize: isMobile ? '1.1rem' : '1.1rem' }}>
+                        Productos Disponibles
+                    </h2>
 
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                            onClick={() => setViewMode('grid')}
-                            style={{
-                                padding: '0.6rem',
-                                borderRadius: 'var(--radius)',
-                                backgroundColor: viewMode === 'grid' ? 'var(--primary)' : 'var(--background)',
-                                color: viewMode === 'grid' ? 'white' : 'var(--text-primary)',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                transition: 'all 0.2s'
-                            }}
-                            title="Vista de cuadrícula"
-                        >
-                            <Grid size={20} />
-                        </button>
-                        <button
-                            onClick={() => setViewMode('list')}
-                            style={{
-                                padding: '0.6rem',
-                                borderRadius: 'var(--radius)',
-                                backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'var(--background)',
-                                color: viewMode === 'list' ? 'white' : 'var(--text-primary)',
-                                border: 'none',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                transition: 'all 0.2s'
-                            }}
-                            title="Vista de lista"
-                        >
-                            <List size={20} />
-                        </button>
-                    </div>
+                    {/* Ocultar botones de vista en mobile, siempre usar lista */}
+                    {!isMobile && (
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                style={{
+                                    padding: '0.6rem',
+                                    borderRadius: 'var(--radius)',
+                                    backgroundColor: viewMode === 'grid' ? 'var(--primary)' : 'var(--background)',
+                                    color: viewMode === 'grid' ? 'white' : 'var(--text-primary)',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s'
+                                }}
+                                title="Vista de cuadrícula"
+                            >
+                                <Grid size={20} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                style={{
+                                    padding: '0.6rem',
+                                    borderRadius: 'var(--radius)',
+                                    backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'var(--background)',
+                                    color: viewMode === 'list' ? 'white' : 'var(--text-primary)',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s'
+                                }}
+                                title="Vista de lista"
+                            >
+                                <List size={20} />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Search Filter */}
-                <div className="card" style={{ marginBottom: '1rem' }}>
+                <div style={{ 
+                    marginBottom: isMobile ? '0.75rem' : '0.75rem',
+                    padding: isMobile ? '0' : undefined
+                }}>
                     <div style={{ position: 'relative' }}>
-                        <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                        <Search 
+                            size={isMobile ? 18 : 18} 
+                            style={{ 
+                                position: 'absolute', 
+                                left: isMobile ? '0.75rem' : '0.75rem', 
+                                top: '50%', 
+                                transform: 'translateY(-50%)', 
+                                color: 'var(--text-secondary)' 
+                            }} 
+                        />
                         <input
                             type="text"
                             placeholder="Buscar producto..."
@@ -303,26 +385,118 @@ const OrderView = ({ onOrderSubmit, savedLists = [] }) => {
                             onChange={(e) => setProductFilter(e.target.value)}
                             style={{
                                 width: '100%',
-                                padding: '0.75rem 1rem 0.75rem 3rem',
+                                padding: isMobile ? '0.6rem 0.75rem 0.6rem 2.5rem' : '0.6rem 0.75rem 0.6rem 2.5rem',
                                 borderRadius: 'var(--radius)',
                                 border: '1px solid var(--border)',
-                                fontSize: '1rem'
+                                fontSize: isMobile ? '0.9rem' : '0.9rem',
+                                backgroundColor: 'var(--surface)'
                             }}
                         />
                     </div>
                 </div>
 
-                <ProductGrid products={filteredProducts} onAddToCart={addToCart} viewMode={viewMode} />
+                <ProductGrid products={filteredProducts} onAddToCart={addToCart} viewMode={isMobile ? 'list' : viewMode} />
             </div>
 
-            <div style={{ width: '350px' }}>
-                <Cart
-                    items={cartItems}
-                    onRemove={removeFromCart}
-                    onUpdateQuantity={updateQuantity}
-                    onSendOrder={sendOrder}
-                />
-            </div>
+            {/* Carrito: Fixed bottom en mobile, sidebar en desktop */}
+            {isMobile ? (
+                <>
+                    {/* Botón flotante para mostrar carrito en mobile */}
+                    {cartItems.length > 0 && (
+                        <button
+                            onClick={() => setShowCart(true)}
+                            style={{
+                                position: 'fixed',
+                                bottom: '1rem',
+                                right: '1rem',
+                                backgroundColor: 'var(--primary)',
+                                color: 'white',
+                                padding: '1rem 1.5rem',
+                                borderRadius: '50px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                zIndex: 1000,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontWeight: 600
+                            }}
+                        >
+                            <ShoppingCart size={20} />
+                            Carrito ({cartItems.length})
+                        </button>
+                    )}
+
+                    {/* Modal del carrito en mobile */}
+                    {showCart && (
+                        <>
+                            <div
+                                onClick={() => setShowCart(false)}
+                                style={{
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                    zIndex: 1001
+                                }}
+                            />
+                            <div style={{
+                                position: 'fixed',
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                maxHeight: '80vh',
+                                zIndex: 1002,
+                                backgroundColor: 'white',
+                                borderTopLeftRadius: '20px',
+                                borderTopRightRadius: '20px',
+                                boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+                                overflow: 'hidden',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                <div style={{
+                                    padding: '1rem',
+                                    borderBottom: '1px solid var(--border)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <h2 style={{ margin: 0, color: 'var(--primary)' }}>Carrito</h2>
+                                    <button
+                                        onClick={() => setShowCart(false)}
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            color: 'var(--text-secondary)',
+                                            padding: '0.5rem'
+                                        }}
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+                                <div style={{ overflowY: 'auto', flex: 1 }}>
+                                    <Cart
+                                        items={cartItems}
+                                        onRemove={removeFromCart}
+                                        onUpdateQuantity={updateQuantity}
+                                        onSendOrder={sendOrder}
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </>
+            ) : (
+                <div style={{ width: '350px' }}>
+                    <Cart
+                        items={cartItems}
+                        onRemove={removeFromCart}
+                        onUpdateQuantity={updateQuantity}
+                        onSendOrder={sendOrder}
+                    />
+                </div>
+            )}
         </div>
     );
 };

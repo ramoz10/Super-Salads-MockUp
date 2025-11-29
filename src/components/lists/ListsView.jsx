@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, FileText } from 'lucide-react';
 import ListBuilder from './ListBuilder';
 import { listsService } from '../../services/listsService';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const ListsView = ({ savedLists = [], onSaveLists }) => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const [lists, setLists] = useState(savedLists);
     const [isBuilding, setIsBuilding] = useState(false);
     const [editingList, setEditingList] = useState(null);
@@ -100,11 +102,34 @@ const ListsView = ({ savedLists = [], onSaveLists }) => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ color: 'var(--primary)' }}>Listas Predefinidas</h1>
-                <button className="btn-primary" onClick={handleNewList} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Plus size={20} />
-                    Nueva Lista
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: isMobile ? '1rem' : '2rem',
+                flexWrap: 'wrap',
+                gap: '1rem'
+            }}>
+                <h1 style={{ 
+                    color: 'var(--primary)',
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    margin: 0
+                }}>
+                    Listas Predefinidas
+                </h1>
+                <button 
+                    className="btn-primary" 
+                    onClick={handleNewList} 
+                    style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.5rem',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        padding: isMobile ? '0.6rem 1rem' : '0.75rem 1.5rem'
+                    }}
+                >
+                    <Plus size={isMobile ? 18 : 20} />
+                    {isMobile ? 'Nueva' : 'Nueva Lista'}
                 </button>
             </div>
 
@@ -120,11 +145,23 @@ const ListsView = ({ savedLists = [], onSaveLists }) => {
                     </button>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: isMobile 
+                        ? '1fr' 
+                        : 'repeat(auto-fill, minmax(300px, 1fr))', 
+                    gap: isMobile ? '1rem' : '1.5rem' 
+                }}>
                     {lists.map((list) => (
-                        <div key={list.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div key={list.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: isMobile ? '1rem' : '1.5rem' }}>
                             <div style={{ marginBottom: '1rem' }}>
-                                <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>{list.name}</h3>
+                                <h3 style={{ 
+                                    marginBottom: '0.5rem', 
+                                    color: 'var(--primary)',
+                                    fontSize: isMobile ? '1.1rem' : '1.25rem'
+                                }}>
+                                    {list.name}
+                                </h3>
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                     {list.items.length} producto{list.items.length !== 1 ? 's' : ''}
                                 </p>
@@ -135,10 +172,10 @@ const ListsView = ({ savedLists = [], onSaveLists }) => {
                                     backgroundColor: 'var(--background)',
                                     borderRadius: 'var(--radius)',
                                     padding: '0.75rem',
-                                    maxHeight: '150px',
+                                    maxHeight: isMobile ? '120px' : '150px',
                                     overflowY: 'auto'
                                 }}>
-                                    {list.items.slice(0, 5).map((item, index) => (
+                                    {list.items.slice(0, isMobile ? 3 : 5).map((item, index) => (
                                         <div key={index} style={{
                                             fontSize: '0.85rem',
                                             marginBottom: '0.25rem',
@@ -147,9 +184,9 @@ const ListsView = ({ savedLists = [], onSaveLists }) => {
                                             • {item.name} ({item.quantity} {item.unit})
                                         </div>
                                     ))}
-                                    {list.items.length > 5 && (
+                                    {list.items.length > (isMobile ? 3 : 5) && (
                                         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                                            +{list.items.length - 5} más...
+                                            +{list.items.length - (isMobile ? 3 : 5)} más...
                                         </div>
                                     )}
                                 </div>
@@ -162,15 +199,16 @@ const ListsView = ({ savedLists = [], onSaveLists }) => {
                                         flex: 1,
                                         backgroundColor: 'var(--primary)',
                                         color: 'white',
-                                        padding: '0.6rem',
+                                        padding: isMobile ? '0.75rem' : '0.6rem',
                                         borderRadius: 'var(--radius)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '0.5rem'
+                                        gap: '0.5rem',
+                                        fontSize: isMobile ? '0.9rem' : '0.875rem'
                                     }}
                                 >
-                                    <Edit size={16} />
+                                    <Edit size={isMobile ? 18 : 16} />
                                     Editar
                                 </button>
                                 <button
@@ -178,14 +216,15 @@ const ListsView = ({ savedLists = [], onSaveLists }) => {
                                     style={{
                                         backgroundColor: 'var(--danger)',
                                         color: 'white',
-                                        padding: '0.6rem',
+                                        padding: isMobile ? '0.75rem' : '0.6rem',
                                         borderRadius: 'var(--radius)',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
+                                        minWidth: isMobile ? '48px' : 'auto'
                                     }}
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={isMobile ? 18 : 16} />
                                 </button>
                             </div>
                         </div>

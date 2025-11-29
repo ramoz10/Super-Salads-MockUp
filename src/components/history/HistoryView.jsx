@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Calendar, ChevronRight } from 'lucide-react';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const HistoryView = ({ orders = [] }) => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const [filter, setFilter] = useState('');
 
     const getStatusColor = (status) => {
@@ -36,9 +38,15 @@ const HistoryView = ({ orders = [] }) => {
 
     return (
         <div>
-            <h1 style={{ marginBottom: '2rem', color: 'var(--primary)' }}>Historial de Pedidos</h1>
+            <h1 style={{ 
+                marginBottom: isMobile ? '1rem' : '2rem', 
+                color: 'var(--primary)',
+                fontSize: isMobile ? '1.5rem' : '2rem'
+            }}>
+                Historial de Pedidos
+            </h1>
 
-            <div className="card" style={{ marginBottom: '2rem' }}>
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
                 <div style={{ position: 'relative' }}>
                     <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input
@@ -57,62 +65,110 @@ const HistoryView = ({ orders = [] }) => {
                 </div>
             </div>
 
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead style={{ backgroundColor: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
-                        <tr>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600 }}>ID Pedido</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600 }}>Fecha</th>
-                            <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Items</th>
-                            <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Total</th>
-                            <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Estado</th>
-                            <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredOrders.length === 0 ? (
-                            <tr>
-                                <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                                    No hay pedidos en el historial
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredOrders.map((order) => (
-                                <tr key={order.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '1rem', fontWeight: 500 }}>{order.id}</td>
-                                    <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <Calendar size={16} />
+            {isMobile ? (
+                // Vista de cards para mobile
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {filteredOrders.length === 0 ? (
+                        <div className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                            No hay pedidos en el historial
+                        </div>
+                    ) : (
+                        filteredOrders.map((order) => (
+                            <div key={order.id} className="card" style={{ padding: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                    <div>
+                                        <h3 style={{ margin: 0, marginBottom: '0.25rem', color: 'var(--primary)' }}>{order.id}</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                            <Calendar size={14} />
                                             {formatDate(order.date)}
                                         </div>
-                                    </td>
-                                    <td style={{ padding: '1rem', textAlign: 'center' }}>{order.itemCount}</td>
-                                    <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>
-                                        {formatPrice(order.total)}
-                                    </td>
-                                    <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                        <span style={{
-                                            padding: '0.25rem 0.75rem',
-                                            backgroundColor: `${getStatusColor(order.status)}20`,
-                                            color: getStatusColor(order.status),
-                                            borderRadius: '1rem',
-                                            fontSize: '0.875rem',
-                                            fontWeight: 500
-                                        }}>
-                                            {order.status}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                        <button style={{ background: 'transparent', color: 'var(--text-secondary)' }}>
-                                            <ChevronRight size={20} />
-                                        </button>
+                                    </div>
+                                    <span style={{
+                                        padding: '0.25rem 0.75rem',
+                                        backgroundColor: `${getStatusColor(order.status)}20`,
+                                        color: getStatusColor(order.status),
+                                        borderRadius: '1rem',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500
+                                    }}>
+                                        {order.status}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Items</div>
+                                        <div style={{ fontWeight: 600 }}>{order.itemCount}</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total</div>
+                                        <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.1rem' }}>
+                                            {formatPrice(order.total)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            ) : (
+                // Vista de tabla para desktop
+                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead style={{ backgroundColor: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
+                            <tr>
+                                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600 }}>ID Pedido</th>
+                                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600 }}>Fecha</th>
+                                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Items</th>
+                                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Total</th>
+                                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Estado</th>
+                                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredOrders.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                        No hay pedidos en el historial
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ) : (
+                                filteredOrders.map((order) => (
+                                    <tr key={order.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                        <td style={{ padding: '1rem', fontWeight: 500 }}>{order.id}</td>
+                                        <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <Calendar size={16} />
+                                                {formatDate(order.date)}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '1rem', textAlign: 'center' }}>{order.itemCount}</td>
+                                        <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>
+                                            {formatPrice(order.total)}
+                                        </td>
+                                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem',
+                                                backgroundColor: `${getStatusColor(order.status)}20`,
+                                                color: getStatusColor(order.status),
+                                                borderRadius: '1rem',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 500
+                                            }}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                            <button style={{ background: 'transparent', color: 'var(--text-secondary)' }}>
+                                                <ChevronRight size={20} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

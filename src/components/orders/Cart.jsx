@@ -1,7 +1,9 @@
 import React from 'react';
 import { Trash2, Send, Plus, Minus } from 'lucide-react';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
     const totalCost = items.reduce((acc, item) => acc + (item.quantity * (item.price || 0)), 0);
 
@@ -19,37 +21,186 @@ const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
     };
 
     return (
-        <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <h2 style={{ marginBottom: '1.5rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="card" style={{ 
+            height: '100%', 
+            display: 'flex', 
+            flexDirection: 'column',
+            padding: '1rem',
+            boxShadow: 'none'
+        }}>
+            <h2 style={{ 
+                marginBottom: isMobile ? '1rem' : '0.75rem', 
+                color: 'var(--primary)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                fontSize: isMobile ? '1.25rem' : '1.1rem'
+            }}>
                 Carrito
-                <span style={{ fontSize: '0.9rem', backgroundColor: 'var(--primary)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '1rem' }}>
+                <span style={{ 
+                    fontSize: '0.8rem', 
+                    backgroundColor: 'var(--primary)', 
+                    color: 'white', 
+                    padding: '0.2rem 0.5rem', 
+                    borderRadius: '1rem' 
+                }}>
                     {totalItems.toFixed(2)}
                 </span>
             </h2>
 
-            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem' }}>
+            <div style={{ flex: 1, overflowY: 'auto', marginBottom: isMobile ? '1rem' : '0.75rem' }}>
                 {items.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginTop: '2rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginTop: isMobile ? '2rem' : '1.5rem', fontSize: '0.9rem' }}>
                         El carrito está vacío
                     </p>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.75rem' : '0.75rem' }}>
                         {items.map((item) => {
                             const subtotal = item.quantity * (item.price || 0);
+                            
+                            if (isMobile) {
+                                // Vista compacta para mobile
+                                return (
+                                    <div 
+                                        key={item.id} 
+                                        style={{ 
+                                            padding: '0.75rem',
+                                            borderBottom: '1px solid var(--border)',
+                                            backgroundColor: 'var(--surface)',
+                                            borderRadius: 'var(--radius)'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'center', 
+                                                    gap: '0.5rem',
+                                                    marginBottom: '0.25rem'
+                                                }}>
+                                                    <h4 style={{ 
+                                                        margin: 0, 
+                                                        fontSize: '0.9rem',
+                                                        fontWeight: 600,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        {item.name}
+                                                    </h4>
+                                                    <span style={{ 
+                                                        fontSize: '0.75rem', 
+                                                        color: 'var(--text-secondary)',
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        {item.unit}
+                                                    </span>
+                                                </div>
+                                                <div style={{ 
+                                                    fontSize: '0.8rem', 
+                                                    color: 'var(--text-secondary)' 
+                                                }}>
+                                                    {formatPrice(item.price || 0)} c/u
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => onRemove(item.id)}
+                                                style={{ 
+                                                    color: 'var(--danger)', 
+                                                    background: 'transparent', 
+                                                    padding: '0.25rem',
+                                                    flexShrink: 0
+                                                }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'space-between',
+                                            gap: '0.5rem'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                                    style={{
+                                                        backgroundColor: 'var(--background)',
+                                                        padding: '0.4rem',
+                                                        borderRadius: 'var(--radius)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        minWidth: '32px',
+                                                        height: '32px'
+                                                    }}
+                                                >
+                                                    <Minus size={14} />
+                                                </button>
+
+                                                <input
+                                                    type="number"
+                                                    value={item.quantity}
+                                                    onChange={(e) => handleQuantityChange(item.id, Number(e.target.value))}
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    style={{
+                                                        width: '60px',
+                                                        padding: '0.4rem',
+                                                        borderRadius: 'var(--radius)',
+                                                        border: '1px solid var(--border)',
+                                                        textAlign: 'center',
+                                                        fontSize: '0.85rem'
+                                                    }}
+                                                />
+
+                                                <button
+                                                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                                    style={{
+                                                        backgroundColor: 'var(--primary)',
+                                                        color: 'white',
+                                                        padding: '0.4rem',
+                                                        borderRadius: 'var(--radius)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        minWidth: '32px',
+                                                        height: '32px'
+                                                    }}
+                                                >
+                                                    <Plus size={14} />
+                                                </button>
+                                            </div>
+                                            
+                                            <span style={{ 
+                                                fontSize: '0.9rem', 
+                                                fontWeight: 600, 
+                                                color: 'var(--primary)',
+                                                marginLeft: 'auto'
+                                            }}>
+                                                {formatPrice(subtotal)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            
+                            // Vista normal para desktop
                             return (
-                                <div key={item.id} style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+                                <div key={item.id} style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--border)' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                                         <div style={{ flex: 1 }}>
-                                            <h4 style={{ marginBottom: '0.25rem' }}>{item.name}</h4>
-                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                            <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>{item.name}</h4>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
                                                 {formatPrice(item.price || 0)} / {item.unit}
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => onRemove(item.id)}
-                                            style={{ color: 'var(--danger)', background: 'transparent', padding: '0.5rem' }}
+                                            style={{ color: 'var(--danger)', background: 'transparent', padding: '0.25rem' }}
                                         >
-                                            <Trash2 size={18} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
 
@@ -58,14 +209,16 @@ const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
                                             onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                                             style={{
                                                 backgroundColor: 'var(--background)',
-                                                padding: '0.5rem',
+                                                padding: '0.4rem',
                                                 borderRadius: 'var(--radius)',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                justifyContent: 'center'
+                                                justifyContent: 'center',
+                                                minWidth: '28px',
+                                                height: '28px'
                                             }}
                                         >
-                                            <Minus size={16} />
+                                            <Minus size={14} />
                                         </button>
 
                                         <input
@@ -75,12 +228,12 @@ const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
                                             min="0.01"
                                             step="0.01"
                                             style={{
-                                                width: '70px',
-                                                padding: '0.5rem',
+                                                width: '60px',
+                                                padding: '0.4rem',
                                                 borderRadius: 'var(--radius)',
                                                 border: '1px solid var(--border)',
                                                 textAlign: 'center',
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.85rem'
                                             }}
                                         />
 
@@ -89,31 +242,22 @@ const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
                                             style={{
                                                 backgroundColor: 'var(--primary)',
                                                 color: 'white',
-                                                padding: '0.5rem',
+                                                padding: '0.4rem',
                                                 borderRadius: 'var(--radius)',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                justifyContent: 'center'
+                                                justifyContent: 'center',
+                                                minWidth: '28px',
+                                                height: '28px'
                                             }}
                                         >
-                                            <Plus size={16} />
+                                            <Plus size={14} />
                                         </button>
 
-                                        <span style={{ marginLeft: '0.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                        <span style={{ marginLeft: '0.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                                             {item.unit}
                                         </span>
-                                    </div>
-
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        padding: '0.5rem',
-                                        backgroundColor: 'var(--background)',
-                                        borderRadius: 'var(--radius)'
-                                    }}>
-                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Subtotal:</span>
-                                        <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--primary)' }}>
+                                        <span style={{ marginLeft: 'auto', fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary)' }}>
                                             {formatPrice(subtotal)}
                                         </span>
                                     </div>
@@ -126,14 +270,14 @@ const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
 
             {items.length > 0 && (
                 <div style={{
-                    padding: '1rem',
+                    padding: isMobile ? '1rem' : '0.75rem',
                     backgroundColor: 'var(--background)',
                     borderRadius: 'var(--radius)',
-                    marginBottom: '1rem'
+                    marginBottom: isMobile ? '1rem' : '0.75rem'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>Total:</span>
-                        <span style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)' }}>
+                        <span style={{ fontSize: isMobile ? '1.1rem' : '1rem', fontWeight: 600 }}>Total:</span>
+                        <span style={{ fontSize: isMobile ? '1.3rem' : '1.15rem', fontWeight: 700, color: 'var(--primary)' }}>
                             {formatPrice(totalCost)}
                         </span>
                     </div>
@@ -144,9 +288,18 @@ const Cart = ({ items, onRemove, onUpdateQuantity, onSendOrder }) => {
                 className="btn-primary"
                 onClick={onSendOrder}
                 disabled={items.length === 0}
-                style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', opacity: items.length === 0 ? 0.5 : 1 }}
+                style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    gap: '0.5rem', 
+                    opacity: items.length === 0 ? 0.5 : 1,
+                    padding: isMobile ? '0.75rem 1.5rem' : '0.65rem 1.25rem',
+                    fontSize: isMobile ? '1rem' : '0.9rem'
+                }}
             >
-                <Send size={18} />
+                <Send size={isMobile ? 18 : 16} />
                 Enviar Pedido
             </button>
         </div>

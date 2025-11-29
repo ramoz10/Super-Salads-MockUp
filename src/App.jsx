@@ -170,6 +170,8 @@ VITE_SUPABASE_ANON_KEY=tu_api_key_supabase_aqui`}
           <Route path="order" element={<Order onOrderSubmit={handleOrderSubmit} savedLists={savedLists} />} />
           <Route path="history" element={<History orders={orderHistory} />} />
         </Route>
+        {/* Redirección adicional para asegurar que cualquier ruta no encontrada vaya a /order */}
+        <Route path="*" element={<Navigate to="/order" replace />} />
       </Routes>
     </BrowserRouter>
   );

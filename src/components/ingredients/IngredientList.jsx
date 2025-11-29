@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Trash2, Edit } from 'lucide-react';
 import AddIngredientModal from './AddIngredientModal';
 import { ingredientsService } from '../../services/ingredientsService';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const IngredientList = () => {
+    const isMobile = useMediaQuery('(max-width: 768px)');
     const [ingredients, setIngredients] = useState([]);
     const [filter, setFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,11 +108,34 @@ const IngredientList = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ color: 'var(--primary)' }}>Ingredientes</h1>
-                <button className="btn-primary" onClick={handleNewIngredient} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Plus size={20} />
-                    Nuevo Ingrediente
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: isMobile ? '1rem' : '2rem',
+                flexWrap: 'wrap',
+                gap: '1rem'
+            }}>
+                <h1 style={{ 
+                    color: 'var(--primary)',
+                    fontSize: isMobile ? '1.5rem' : '2rem',
+                    margin: 0
+                }}>
+                    Ingredientes
+                </h1>
+                <button 
+                    className="btn-primary" 
+                    onClick={handleNewIngredient} 
+                    style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.5rem',
+                        fontSize: isMobile ? '0.9rem' : '1rem',
+                        padding: isMobile ? '0.6rem 1rem' : '0.75rem 1.5rem'
+                    }}
+                >
+                    <Plus size={isMobile ? 18 : 20} />
+                    {isMobile ? 'Nuevo' : 'Nuevo Ingrediente'}
                 </button>
             </div>
 
@@ -133,66 +158,127 @@ const IngredientList = () => {
                 </div>
             </div>
 
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead style={{ backgroundColor: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
-                        <tr>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600 }}>Nombre</th>
-                            <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Unidad</th>
-                            <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Precio</th>
-                            <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredIngredients.map((ing) => (
-                            <tr
-                                key={ing.id}
-                                style={{
-                                    borderBottom: '1px solid var(--border)',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--background)'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            {isMobile ? (
+                // Vista de cards para mobile
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {filteredIngredients.length === 0 ? (
+                        <div className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                            No se encontraron ingredientes
+                        </div>
+                    ) : (
+                        filteredIngredients.map((ing) => (
+                            <div 
+                                key={ing.id} 
+                                className="card" 
                                 onClick={() => handleRowClick(ing)}
+                                style={{ 
+                                    cursor: 'pointer',
+                                    padding: '1rem'
+                                }}
                             >
-                                <td style={{ padding: '1rem' }}>{ing.name}</td>
-                                <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem',
-                                        backgroundColor: 'var(--background)',
-                                        borderRadius: '1rem',
-                                        fontSize: '0.875rem'
-                                    }}>
-                                        {ing.unit}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>
-                                    {formatPrice(ing.price)}
-                                </td>
-                                <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{ margin: 0, marginBottom: '0.5rem' }}>{ing.name}</h3>
+                                        <span style={{
+                                            padding: '0.25rem 0.75rem',
+                                            backgroundColor: 'var(--background)',
+                                            borderRadius: '1rem',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            {ing.unit}
+                                        </span>
+                                    </div>
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleDelete(ing.id);
                                         }}
-                                        style={{ color: 'var(--danger)', background: 'transparent', padding: '0.5rem' }}
+                                        style={{ 
+                                            color: 'var(--danger)', 
+                                            background: 'transparent', 
+                                            padding: '0.5rem',
+                                            marginLeft: '0.5rem'
+                                        }}
                                     >
                                         <Trash2 size={18} />
                                     </button>
-                                </td>
-                            </tr>
-                        ))}
-                        {filteredIngredients.length === 0 && (
+                                </div>
+                                <div style={{ 
+                                    paddingTop: '0.75rem', 
+                                    borderTop: '1px solid var(--border)',
+                                    fontWeight: 600, 
+                                    color: 'var(--primary)',
+                                    fontSize: '1.1rem'
+                                }}>
+                                    {formatPrice(ing.price)}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            ) : (
+                // Vista de tabla para desktop
+                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead style={{ backgroundColor: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
                             <tr>
-                                <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                                    No se encontraron ingredientes
-                                </td>
+                                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: 600 }}>Nombre</th>
+                                <th style={{ padding: '1rem', textAlign: 'center', fontWeight: 600 }}>Unidad</th>
+                                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Precio</th>
+                                <th style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Acciones</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {filteredIngredients.map((ing) => (
+                                <tr
+                                    key={ing.id}
+                                    style={{
+                                        borderBottom: '1px solid var(--border)',
+                                        cursor: 'pointer',
+                                        transition: 'background-color 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--background)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    onClick={() => handleRowClick(ing)}
+                                >
+                                    <td style={{ padding: '1rem' }}>{ing.name}</td>
+                                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                        <span style={{
+                                            padding: '0.25rem 0.75rem',
+                                            backgroundColor: 'var(--background)',
+                                            borderRadius: '1rem',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            {ing.unit}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>
+                                        {formatPrice(ing.price)}
+                                    </td>
+                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(ing.id);
+                                            }}
+                                            style={{ color: 'var(--danger)', background: 'transparent', padding: '0.5rem' }}
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {filteredIngredients.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                        No se encontraron ingredientes
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             <AddIngredientModal
                 isOpen={isModalOpen}

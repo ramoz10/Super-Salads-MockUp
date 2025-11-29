@@ -62,21 +62,26 @@ const ExcelUploader = ({ onUpload, ingredients = [] }) => {
     };
 
     return (
-        <div style={{ marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Carga Rápida desde Excel</h3>
+        <div style={{ marginBottom: '1rem' }}>
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: '0.75rem' 
+            }}>
+                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600 }}>Carga Rápida desde Excel</h3>
                 <button
                     onClick={downloadTemplate}
                     className="btn-primary"
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.6rem 1rem',
-                        fontSize: '0.9rem'
+                        gap: '0.4rem',
+                        padding: '0.5rem 0.85rem',
+                        fontSize: '0.85rem'
                     }}
                 >
-                    <Download size={18} />
+                    <Download size={16} />
                     Descargar Plantilla
                 </button>
             </div>
@@ -87,11 +92,12 @@ const ExcelUploader = ({ onUpload, ingredients = [] }) => {
                     border: '2px dashed var(--border)',
                     backgroundColor: 'var(--background)',
                     display: 'flex',
-                    flexDirection: 'column',
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '2rem',
-                    cursor: 'pointer'
+                    justifyContent: 'space-between',
+                    padding: '0.75rem 1rem',
+                    cursor: 'pointer',
+                    gap: '1rem'
                 }}
                 onClick={() => fileInputRef.current.click()}
             >
@@ -102,19 +108,37 @@ const ExcelUploader = ({ onUpload, ingredients = [] }) => {
                     style={{ display: 'none' }}
                     accept=".xlsx, .xls"
                 />
-                <Upload size={32} style={{ color: 'var(--primary)', marginBottom: '1rem' }} />
-                <p style={{ fontWeight: 500, marginBottom: '0.5rem' }}>Cargar pedido desde Excel</p>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                    Arrastra o haz clic para seleccionar
-                </p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                    Formato: Nombre, Unidad, Cantidad
-                </p>
-                {ingredients.length > 0 && (
-                    <p style={{ fontSize: '0.8rem', color: 'var(--primary)', marginTop: '0.5rem', fontWeight: 500 }}>
-                        La plantilla incluye {ingredients.length} ingrediente{ingredients.length !== 1 ? 's' : ''} disponible{ingredients.length !== 1 ? 's' : ''}
-                    </p>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                    <Upload size={20} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ 
+                            fontWeight: 500, 
+                            margin: 0, 
+                            fontSize: '0.9rem',
+                            marginBottom: '0.25rem'
+                        }}>
+                            Cargar pedido desde Excel
+                        </p>
+                        <p style={{ 
+                            fontSize: '0.8rem', 
+                            color: 'var(--text-secondary)', 
+                            margin: 0 
+                        }}>
+                            Arrastra o haz clic • Formato: Nombre, Unidad, Cantidad
+                        </p>
+                        {ingredients.length > 0 && (
+                            <p style={{ 
+                                fontSize: '0.75rem', 
+                                color: 'var(--primary)', 
+                                marginTop: '0.25rem', 
+                                fontWeight: 500,
+                                margin: 0
+                            }}>
+                                {ingredients.length} ingrediente{ingredients.length !== 1 ? 's' : ''} disponible{ingredients.length !== 1 ? 's' : ''}
+                            </p>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
